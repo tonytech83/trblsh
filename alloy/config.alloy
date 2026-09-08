@@ -1,0 +1,64 @@
+// ------------------------------------------------------------
+// 1. Read systemd journal — priorities 0..3 (emerg, alert, crit, err)
+//    Same-field matches are OR'ed, exactly like journalctl.
+// ------------------------------------------------------------
+loki.source.journal "read_errors" {
+        forward_to    = [loki.write.local.receiver]
+        relabel_rules = loki.relabel.relabel_journal.rules
+        matches       = "PRIORITY=0 PRIORITY=1 PRIORITY=2 PRIORITY=3"
+        labels        = {
+                job  = "journald",
+                host = constants.hostname,
+        }
+}
+
+// ------------------------------------------------------------
+// 2. Relabel journald metadata into log labels
+// ------------------------------------------------------------
+loki.relabel "relabel_journal" {
+        forward_to = []
+
+        rule {
+                source_labels = ["__journal__systemd_unit"]
+                target_label  = "unit"
+        }
+        rule {
+                source_labels = ["__journal__transport"]
+                target_label  = "transport"
+        }
+
+        // PRIORITY number -> level name
+        rule {
+                source_labels = ["__journal_priority"]
+                regex         = "0"
+                target_label  = "level"
+                replacement   = "emerg"
+        }
+        rule {
+                source_labels = ["__journal_priority"]
+                regex         = "1"
+                target_label  = "level"
+                replacement   = "alert"
+        }
+        rule {
+                source_labels = ["__journal_priority"]
+                regex         = "2"
+                target_label  = "level"
+                replacement   = "crit"
+        }
+        rule {
+                source_labels = ["__journal_priority"]
+                regex         = "3"
+                target_label  = "level"
+                replacement   = "err"
+        }
+}
+
+// ------------------------------------------------------------
+// 3. Loki writer
+// ------------------------------------------------------------
+loki.write "local" {
+        endpoint {
+                url = "http://192.168.56.14:3100/loki/api/v1/push"
+        }
+}
