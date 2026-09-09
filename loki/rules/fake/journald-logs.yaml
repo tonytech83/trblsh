@@ -1,0 +1,12 @@
+groups:
+  - name: journald-errors
+    interval: 15s
+    rules:
+      - alert: CriticalLogDetected
+        expr: sum by (host, ip) (count_over_time({job="journald", level=~"err|crit|alert|emerg"}[1m])) > 0
+        labels:
+          alertname: CriticalLogDetected
+          severity: critical
+        annotations:
+          description: Detected error-level logs from journald on {{ $labels.host }}
+          summary: Critical log detected in journald

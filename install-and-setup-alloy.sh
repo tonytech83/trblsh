@@ -17,7 +17,7 @@ detect_sudo() {
     elif command_exists doas && [ -f /etc/doas.conf ]; then
         SUDO_CMD="doas"
     else
-        printf "No sudo/doas found and not running as root"
+        echo "No sudo/doas found and not running as root"
         exit 1
     fi
 }
@@ -31,10 +31,10 @@ detect_packager() {
         fi
     done
     if [ -z "$PACKAGER" ]; then
-        printf "No supported package manager found (apt-get, dnf, yum, zypper)" >&2
+        echo "No supported package manager found (apt-get, dnf, yum, zypper)" >&2
         exit 1
     fi
-    printf "Using ${PACKAGER} for package manager."
+    echo "Using ${PACKAGER} for package manager."
 }
 
 install_alloy() {
@@ -77,7 +77,7 @@ echo "* Installing config and defaults ..."
 ${SUDO_CMD} install -m 0644 -o root -g root ./alloy/config.alloy /etc/alloy/config.alloy
 ${SUDO_CMD} install -m 0644 -o root -g root ./alloy/alloy "${ENV_FILE}"
 
-msg_ok "Enabling and starting Alloy"
+msg_ok "* Enabling and starting Alloy"
 ${SUDO_CMD} systemctl enable --now alloy
 ${SUDO_CMD} systemctl restart alloy
 ${SUDO_CMD} systemctl status alloy --no-pager

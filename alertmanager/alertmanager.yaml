@@ -1,0 +1,10 @@
+route:
+  group_by: ["hostname"]
+  group_wait: 30s
+  group_interval: 1m
+  repeat_interval: 2m
+  receiver: "web.hook"
+receivers:
+  - name: "web.hook"
+    webhook_configs:
+      - url: "http://192.168.56.15:8080/alert"

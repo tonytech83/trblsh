@@ -1,0 +1,6 @@
+- targets:
+    - alertmanager
+    - loki
+    - blackbox
+  labels:
+    env: homelab
