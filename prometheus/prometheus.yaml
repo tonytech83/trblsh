@@ -35,13 +35,20 @@ scrape_configs:
     static_configs:
       - targets: ["blackbox:9115"]
 
-  # --- probes of the Linux targets, via blackbox ---------------------------
-  - job_name: probe_icmp
+  # --- node_exporter: CPU, RAM, DISK, load, network ---
+  - job_name: node
+    file_sd_configs:
+      - files: ["/etc/prometheus/targets/nodes.yaml"]
+        refresh_interval: 1m
+
+  # --- blackbox: ICMP ping against targets ---
+  - job_name: blackbox-icmp
     metrics_path: /probe
     params:
       module: [icmp]
     file_sd_configs:
       - files: ["/etc/prometheus/targets/hosts.yaml"]
+        refresh_interval: 1m
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -50,12 +57,14 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox:9115
 
+  # --- blackbox: SSH service check against targets ---
   - job_name: probe_ssh
     metrics_path: /probe
     params:
       module: [tcp_connect]
     file_sd_configs:
       - files: ["/etc/prometheus/targets/hosts.yaml"]
+        refresh_interval: 1m
     relabel_configs:
       - source_labels: [__address__]
         regex: "(.*)"

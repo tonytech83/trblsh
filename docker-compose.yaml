@@ -24,7 +24,7 @@ services:
       - --web.enable-remote-write-receiver
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
-      - ./prometheus/targets/hosts.yaml:/etc/prometheus/targets/hosts.yaml
+      - ./prometheus/targets:/etc/prometheus/targets
       - prom-data:/prometheus
     ports: ["9090:9090"]
     restart: unless-stopped

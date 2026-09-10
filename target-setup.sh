@@ -36,7 +36,26 @@ detect_packager() {
     echo "Using ${PACKAGER} for package manager."
 }
 
+install_dependencies() {
+    case "$PACKAGER" in
+        apt-get)
+            export DEBIAN_FRONTEND=noninteractive
+            ${SUDO_CMD} apt-get update
+            ${SUDO_CMD} apt-get install -y gpg curl tar jq
+            ;;
+        dnf | yum)
+            ${SUDO_CMD} "${PACKAGER}" install -y curl tar jq
+            ;;
+        zypper)
+            ${SUDO_CMD} zypper --non-interactive install curl tar jq
+            ;;
+    esac
+    echo "* Dependencies installed."
+}
+
 install_alloy() {
+    echo "* Installing Alloy ..."
+
     case "$PACKAGER" in
         apt-get)
             export DEBIAN_FRONTEND=noninteractive
@@ -82,7 +101,7 @@ install_alloy() {
     echo "* Alloy installed."
 }
 
-install_configs() {
+install_alloy_configs() {
     echo "* Installing config and defaults ..."
 
     local base="https://raw.githubusercontent.com/tonytech83/trblsh/master/alloy"
@@ -97,15 +116,58 @@ install_configs() {
     ${SUDO_CMD} install -D -m 0644 -o root -g root "${tmp}/config.alloy" /etc/alloy/config.alloy
 }
 
+install_node_exporter() {
+    echo "* Installing Node exporter ..."
+
+    local base="https://raw.githubusercontent.com/tonytech83/trblsh/master/node_exporter"
+    local tmp ne_version ne_dir
+    tmp="$(mktemp -d)"
+    trap 'rm -rf "${tmp}"' RETURN
+
+    # system user
+    if ! id node_exporter >/dev/null 2>&1; then
+        ${SUDO_CMD} useradd --system --no-create-home --shell /usr/sbin/nologin node_exporter
+    fi
+
+    # latest version
+    ne_version=$(curl -fsSL https://api.github.com/repos/prometheus/node_exporter/releases/latest \
+        | jq -r '.tag_name | ltrimstr("v")')
+    if [ -z "$ne_version" ] || [ "$ne_version" = "null" ]; then
+        echo "! Could not determine node_exporter version" >&2
+        return 1
+    fi
+
+    # binary
+    ne_dir="node_exporter-${ne_version}.linux-amd64"
+    curl -fsSL "https://github.com/prometheus/node_exporter/releases/download/v${ne_version}/${ne_dir}.tar.gz" \
+        -o "${tmp}/${ne_dir}.tar.gz"
+    tar -xzf "${tmp}/${ne_dir}.tar.gz" -C "${tmp}"
+    ${SUDO_CMD} install -m 0755 "${tmp}/${ne_dir}/node_exporter" /usr/local/bin/node_exporter
+
+    # textfile collector dir
+    ${SUDO_CMD} mkdir -p /var/lib/node_exporter/textfile_collector
+    ${SUDO_CMD} chown node_exporter:node_exporter /var/lib/node_exporter/textfile_collector
+
+    # systemd unit
+    curl -fsSL "${base}/node_exporter.service" -o "${tmp}/node_exporter.service"
+    ${SUDO_CMD} install -D -m 0644 -o root -g root "${tmp}/node_exporter.service" /etc/systemd/system/node_exporter.service
+
+    ${SUDO_CMD} systemctl daemon-reload
+    ${SUDO_CMD} systemctl enable --now node_exporter
+    echo "* node_exporter ${ne_version} installed, listening on :9100."
+}
+
 detect_sudo
 detect_packager
+install_dependencies
 install_alloy
-install_configs
+install_alloy_configs
+install_node_exporter
 
 echo "* Validating config ..."
 ${SUDO_CMD} alloy validate /etc/alloy/config.alloy
 
 echo "* Enabling and starting Alloy"
 ${SUDO_CMD} systemctl enable --now alloy
-${SUDO_CMD} systemctl restart alloy
-${SUDO_CMD} systemctl status alloy --no-pager
+${SUDO_CMD} systemctl status alloy --no-pager || true
+${SUDO_CMD} systemctl status node_exporter --no-pager || true

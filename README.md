@@ -1,12 +1,17 @@
 # trblsh
 
-1. Install alloy on target
+### Target setup
+
+- Alloy
+- Node_Exporter
+
+Install alloy and node_exporter on target
 
 ```ah
-curl -fsSL https://raw.githubusercontent.com/tonytech83/trblsh/master/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/tonytech83/trblsh/master/target-setup.sh | bash
 ```
 
-2. Up and running trblsh containers
+### Up and running trblsh containers
 
 ```sh
 docker compose up -d
