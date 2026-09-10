@@ -9,7 +9,7 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
 def init_db() -> None:
     # Import models so SQLModel.metadata is populated before create_all
-    import troubleshooter.models.incident  # noqa: F401
+    import models.incident  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
 

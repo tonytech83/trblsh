@@ -1,6 +1,5 @@
+from api.endpoints import alerts, ui
 from fastapi import APIRouter
-
-from troubleshooter.api.endpoints import alerts, ui
 
 router = APIRouter()
 

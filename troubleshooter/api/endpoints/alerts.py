@@ -4,13 +4,12 @@ import uuid
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from db import get_session
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
+from models.incident import Incident, IncidentAnalysis
+from schemas.alert import AlertmanagerWebhook
 from sqlmodel import Session, select
-
-from troubleshooter.db import get_session
-from troubleshooter.models.incident import Incident, IncidentAnalysis
-from troubleshooter.schemas.alert import AlertmanagerWebhook
 
 load_dotenv()
 

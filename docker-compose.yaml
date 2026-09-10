@@ -46,6 +46,15 @@ services:
     cap_add: [NET_RAW]
     restart: unless-stopped
 
+  troubleshooter:
+    build: troubleshooter/.
+    ports: ["8080:8080"]
+    env_file: .env
+    depends_on:
+      loki: { condition: service_healthy }
+      prometheus: { condition: service_started }
+    restart: unless-stopped
+
 volumes:
   loki-data:
   prom-data:
