@@ -2,13 +2,13 @@ import json
 import os
 from pathlib import Path
 
-from db import get_session
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from models.incident import Incident, IncidentAnalysis
 from sqlmodel import Session, col, select
+from tools.db import get_session
 
 load_dotenv()
 

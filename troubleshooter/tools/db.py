@@ -1,5 +1,6 @@
 from collections.abc import Generator
 
+from agents import function_tool
 from sqlmodel import Session, SQLModel, create_engine
 
 DATABASE_URL = "sqlite:///db.db"
@@ -14,6 +15,8 @@ def init_db() -> None:
     SQLModel.metadata.create_all(engine)
 
 
+@function_tool
 def get_session() -> Generator[Session, None, None]:
+    """Open the session to database"""
     with Session(engine) as session:
         yield session
