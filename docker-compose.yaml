@@ -25,6 +25,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
       - ./prometheus/targets:/etc/prometheus/targets
+      - ./prometheus/rules:/etc/prometheus/rules
       - prom-data:/prometheus
     ports: ["9090:9090"]
     restart: unless-stopped

@@ -12,8 +12,7 @@ alerting:
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+  - "/etc/prometheus/rules/*.yaml"
 
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
@@ -42,12 +41,12 @@ scrape_configs:
         refresh_interval: 1m
 
   # --- blackbox: ICMP ping against targets ---
-  - job_name: blackbox-icmp
+  - job_name: icmp
     metrics_path: /probe
     params:
       module: [icmp]
     file_sd_configs:
-      - files: ["/etc/prometheus/targets/hosts.yaml"]
+      - files: ["/etc/prometheus/targets/icmp.yaml"]
         refresh_interval: 1m
     relabel_configs:
       - source_labels: [__address__]
@@ -58,12 +57,12 @@ scrape_configs:
         replacement: blackbox:9115
 
   # --- blackbox: SSH service check against targets ---
-  - job_name: probe_ssh
+  - job_name: ssh
     metrics_path: /probe
     params:
       module: [tcp_connect]
     file_sd_configs:
-      - files: ["/etc/prometheus/targets/hosts.yaml"]
+      - files: ["/etc/prometheus/targets/ssh.yaml"]
         refresh_interval: 1m
     relabel_configs:
       - source_labels: [__address__]
