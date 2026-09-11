@@ -1,5 +1,5 @@
 - targets:
-    - 192.168.99.100
+    - 192.168.99.100:9100
   labels:
     env: homelab
     role: monitoring
