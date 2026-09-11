@@ -6,10 +6,7 @@ Wants=network-online.target
 [Service]
 User=node_exporter
 Group=node_exporter
-EnvironmentFile=-${ENV_FILE}
-ExecStart=/usr/local/bin/node_exporter \\
-    --collector.textfile.directory=/var/lib/node_exporter/textfile_collector \\
-    \$NODE_EXPORTER_ARGS
+ExecStart=/usr/local/bin/node_exporter
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=true

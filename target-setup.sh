@@ -144,10 +144,6 @@ install_node_exporter() {
     tar -xzf "${tmp}/${ne_dir}.tar.gz" -C "${tmp}"
     ${SUDO_CMD} install -m 0755 "${tmp}/${ne_dir}/node_exporter" /usr/local/bin/node_exporter
 
-    # textfile collector dir
-    ${SUDO_CMD} mkdir -p /var/lib/node_exporter/textfile_collector
-    ${SUDO_CMD} chown node_exporter:node_exporter /var/lib/node_exporter/textfile_collector
-
     # systemd unit
     curl -fsSL "${base}/node_exporter.service" -o "${tmp}/node_exporter.service"
     ${SUDO_CMD} install -D -m 0644 -o root -g root "${tmp}/node_exporter.service" /etc/systemd/system/node_exporter.service
